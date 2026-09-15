@@ -22,6 +22,8 @@ class WebhookTransferResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Relay';
+
     protected static ?string $navigationLabel = 'Webhook Transfer';
 
     protected static ?string $modelLabel = 'webhook transfer';

@@ -1,0 +1,194 @@
+.sh-section-aside .fi-section.fi-aside > .fi-section-content-ctn {
+    @apply bg-transparent shadow-none ring-0 lg:max-w-3xl;
+
+    & > .fi-section-content {
+        @apply p-0;
+    }
+}
+
+.fi-sc-component-ctn {
+    @apply lg:gap-7;
+}
+
+.fi-section:not(.sh-section-aside *) {
+    @apply rounded-xl bg-gray-50 p-1.5 ring-1 ring-gray-200 dark:bg-gray-950 dark:ring-white/10;
+
+    .fi-section-content {
+        @apply p-1;
+    }
+
+    .fi-section-header {
+        @apply px-2 py-3;
+    }
+
+    &.fi-collapsed .fi-section-header {
+        @apply rounded-b-xl;
+    }
+
+    .fi-section-content-ctn {
+        @apply rounded-lg border-t-0 bg-white p-4 ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10;
+    }
+
+    &:not(.fi-section-has-header) {
+        @apply rounded-none bg-transparent shadow-none ring-0 ring-transparent dark:bg-transparent;
+
+        .fi-section-content-ctn {
+            @apply p-0 shadow-none ring-0;
+        }
+    }
+}
+
+.fi-fo-repeater-item.fi-fo-repeater-item-has-header {
+    @apply bg-gray-50 p-1.5 ring-1 ring-gray-200 dark:bg-gray-950 dark:ring-white/10;
+
+    > .fi-fo-repeater-item-header {
+    }
+
+    > .fi-fo-repeater-item-content {
+        @apply rounded-lg border-t-0 bg-white ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10;
+    }
+}
+
+.fi-fo-file-upload.admin-image-upload {
+    @apply items-start rounded-2xl;
+}
+
+.fi-fo-file-upload.admin-image-upload .filepond--root {
+    @apply m-0 w-full;
+}
+
+.fi-fo-file-upload.admin-image-upload .filepond--panel-root {
+    @apply rounded-2xl border border-dashed border-slate-200 bg-white shadow-none transition dark:border-white/10 dark:bg-gray-950/60;
+}
+
+.fi-fo-file-upload.admin-image-upload .filepond--drop-label label {
+    @apply flex h-full items-center justify-center px-4 text-center text-sm font-medium text-slate-400 dark:text-slate-500;
+}
+
+.fi-fo-file-upload.admin-image-upload .filepond--item-panel {
+    @apply rounded-2xl bg-white dark:bg-gray-950;
+}
+
+.fi-fo-file-upload.admin-image-upload .filepond--image-preview-wrapper {
+    @apply bg-slate-50 dark:bg-gray-950;
+}
+
+.fi-fo-file-upload.admin-image-upload-square .filepond--drop-label label {
+    @apply min-h-[7.5rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-square .filepond--root {
+    @apply max-w-[9rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-wide .filepond--drop-label label {
+    @apply min-h-[12rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-landscape .filepond--drop-label label {
+    @apply min-h-[6.5rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-landscape .filepond--root {
+    @apply max-w-[14rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-icon .filepond--drop-label label {
+    @apply min-h-[5.5rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-icon .filepond--root {
+    @apply max-w-[6rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-avatar .filepond--drop-label label {
+    @apply min-h-[8.5rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-avatar .filepond--root {
+    @apply max-w-[10rem];
+}
+
+.fi-fo-file-upload.admin-image-upload-thumb .filepond--drop-label label {
+    @apply min-h-[5.5rem] p-2! text-xs;
+}
+
+.fi-fo-repeater.product-images-slots {
+    @apply gap-y-0;
+}
+
+.fi-fo-repeater.product-images-slots .fi-fo-repeater-items {
+    @apply gap-4;
+}
+
+.fi-fo-repeater.product-images-slots .fi-fo-repeater-item {
+    @apply rounded-none bg-transparent p-0 shadow-none ring-0;
+}
+
+.fi-fo-repeater.product-images-slots .fi-fo-repeater-item-content {
+    @apply border-0 bg-transparent p-0 ring-0;
+}
+
+.fi-fo-file-upload.product-image-slot-upload {
+    @apply rounded-none;
+}
+
+.fi-fo-file-upload.product-image-slot-upload .filepond--root {
+    @apply m-0;
+}
+
+.fi-fo-file-upload.product-image-slot-upload .filepond--panel-root {
+    @apply rounded-none border border-dashed border-slate-200 bg-white shadow-none transition dark:border-white/10 dark:bg-gray-950/60;
+}
+
+.fi-fo-file-upload.product-image-slot-upload .filepond--drop-label {
+    @apply min-h-[220px];
+}
+
+.fi-fo-file-upload.product-image-slot-upload .filepond--drop-label label {
+    @apply relative flex h-full min-h-[220px] items-center justify-center text-transparent;
+}
+
+.fi-fo-file-upload.product-image-slot-upload .filepond--drop-label label::after {
+    content: '+';
+    @apply text-5xl font-light text-slate-300 dark:text-slate-600;
+}
+
+.fi-fo-file-upload.product-image-slot-upload .filepond--item-panel {
+    @apply rounded-none bg-white dark:bg-gray-950;
+}
+
+.fi-fo-file-upload.product-image-slot-upload .filepond--image-preview-wrapper {
+    @apply bg-white dark:bg-gray-950;
+}
+
+.fi-fo-table-repeater.product-variant-table .fi-fo-file-upload.product-variant-image-upload {
+    @apply items-center;
+}
+
+.fi-fo-table-repeater.product-variant-table .fi-fo-file-upload.product-variant-image-upload .filepond--root {
+    @apply mx-auto w-[5.5rem];
+}
+
+.fi-fo-table-repeater.product-variant-table
+    .fi-fo-file-upload.product-variant-image-upload
+    .filepond--drop-label
+    label {
+    @apply min-h-[5.5rem] p-2! text-xs;
+}
+
+.fi-fo-rich-editor.product-details-rich-editor .fi-fo-rich-editor-main.product-details-rich-editor-main {
+    height: 24rem;
+    min-height: 16rem;
+    overflow: hidden;
+    resize: vertical;
+}
+
+.fi-fo-rich-editor.product-details-rich-editor .fi-fo-rich-editor-content {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.fi-fo-rich-editor.product-details-rich-editor .fi-fo-rich-editor-content .tiptap.ProseMirror {
+    overflow-y: auto;
+}

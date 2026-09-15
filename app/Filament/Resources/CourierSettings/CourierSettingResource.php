@@ -21,6 +21,8 @@ class CourierSettingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Setting & Configuration';
+
     protected static ?string $navigationLabel = 'Courier Secrets';
 
     protected static ?string $modelLabel = 'courier secret';

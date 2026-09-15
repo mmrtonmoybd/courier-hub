@@ -14,6 +14,9 @@ relayed.
 
 - Author: Moshiur Rahman <rmedha037@gmail.com>
 - Stack: Laravel 13, Filament 5, Livewire 4, PHP 8.4, MySQL, Pest 5
+- Filament plugins: Northwestern theme, Auth Designer (login page), Breezy (profile,
+  avatars, browser sessions), Overlook (resource cards). The panel reuses the
+  ecommerce admin theme: same orange palette, sidebar layout and base styles.
 
 ## Why
 
@@ -127,9 +130,25 @@ Add the scheduler to cron once, if it is not already there:
 
 The Filament panel is served from `/`.
 
+### Dashboard
+
+- **Stats** — webhooks in the last 24 hours (with an hourly sparkline), success
+  rate, forwards awaiting retry, unmatched webhooks, active routes, distinct
+  sites, couriers wired, average attempts per webhook.
+- **Forwarding volume** — delivered / failed / unmatched per day, over 7, 14 or
+  30 days.
+- **Webhooks by courier** — share of traffic per courier over the last week.
+- **Site performance** — delivered and failed counts per routing row for the last
+  week, plus when each site last received a webhook. The fastest way to spot the
+  one site out of thirty that stopped accepting forwards.
+- **Needs attention** — every failed or unmatched webhook, newest first, with a
+  one-click retry and a link to the full log entry.
+
 - **Webhook Transfer** — the routing table. A row is one site + one courier +
-  one tenant database. `Site address` is scheme and host only; the courier path
-  is appended automatically, and anything with a path is rejected. The tenant
+  one tenant database. You enter only the site address, e.g.
+  `https://elegantemart.com`; the relay appends the courier's own webhook path
+  (`/api/webhooks/pathao`), shows the resulting URL in the form, and rejects an
+  address that already carries a path. The tenant
   database list is read live from the server and filtered to databases that
   contain an `orders` table. **Add site** maps one site to several couriers at
   once.
@@ -172,6 +191,13 @@ both are configurable in `config/couriers.php`.
 
 No other code changes are needed — identity extraction, resolution, forwarding
 and retries are all driven by that config entry.
+
+## Front-end build
+
+The panel theme lives in `resources/css/filament/admin/` and is compiled by Vite
+(`npm run build`, or `npm run dev` while working on it). It imports the Filament
+and Northwestern theme stylesheets, so `@tailwindcss/forms` and
+`@tailwindcss/typography` are required dev dependencies.
 
 ## Design document
 

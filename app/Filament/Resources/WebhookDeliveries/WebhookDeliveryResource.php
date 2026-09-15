@@ -22,6 +22,8 @@ class WebhookDeliveryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Relay';
+
     protected static ?string $navigationLabel = 'Delivery Log';
 
     protected static ?string $modelLabel = 'delivery';

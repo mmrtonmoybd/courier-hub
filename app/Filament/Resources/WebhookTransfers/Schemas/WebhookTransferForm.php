@@ -14,6 +14,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class WebhookTransferForm
@@ -38,12 +39,32 @@ class WebhookTransferForm
                                 ->required()
                                 ->rules([new HostOnlyUrl])
                                 ->maxLength(255)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (Set $set, Get $get, ?string $state) => $set(
+                                    'forward_url_preview',
+                                    self::forwardPreview($state, $get('courier')),
+                                ))
                                 ->columnSpan(1),
                             Select::make('courier')
                                 ->options(Courier::options())
                                 ->required()
                                 ->native(false)
+                                ->live()
+                                ->afterStateUpdated(fn (Set $set, Get $get, ?string $state) => $set(
+                                    'forward_url_preview',
+                                    self::forwardPreview($get('target_url'), $state),
+                                ))
                                 ->columnSpan(1),
+                            TextInput::make('forward_url_preview')
+                                ->label('Forwards to')
+                                ->disabled()
+                                ->dehydrated(false)
+                                ->helperText('Built from the site address and the courier. This is what the tenant receives.')
+                                ->columnSpanFull()
+                                ->afterStateHydrated(fn (TextInput $component, ?WebhookTransfer $record) => $component->state(self::forwardPreview(
+                                    $record?->target_url,
+                                    $record?->courier?->value,
+                                ))),
                             Select::make('database_name')
                                 ->label('Tenant database')
                                 ->options(fn (): array => self::databaseOptions())
@@ -107,6 +128,19 @@ class WebhookTransferForm
     public static function databaseOptions(): array
     {
         return app(TenantDatabaseCatalog::class)->options();
+    }
+
+    /**
+     * Only the site address is entered; the courier's webhook path is appended
+     * by the relay, exactly as the courier would have called the site directly.
+     */
+    private static function forwardPreview(mixed $targetUrl, mixed $courier): string
+    {
+        if (blank($targetUrl) || blank($courier)) {
+            return 'Enter the site address and courier.';
+        }
+
+        return rtrim((string) $targetUrl, '/').'/api/webhooks/'.$courier;
     }
 
     private static function secretHelper(mixed $courier): string
