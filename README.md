@@ -120,6 +120,20 @@ DB_USERNAME=root
 DB_PASSWORD=secret
 ```
 
+### Seeders
+
+| seeder | what it does | safe in production |
+| --- | --- | --- |
+| `CourierSettingSeeder` | one row per supported courier, pre-filled with its default secret. Runs as part of `db:seed`. | yes |
+| `WebhookTransferSeeder` | maps every tenant database found on the shared credentials to every courier, using known site addresses where available. Re-runnable. | yes, then edit the rows in the admin |
+| `DemoDataSeeder` | the two above plus two weeks of demo traffic (delivered, failed and unmatched) across every route, for trying out the dashboard, filters and retries. | **no** |
+
+```bash
+php artisan db:seed                                    # couriers only
+php artisan db:seed --class=WebhookTransferSeeder      # map the databases found on this server
+php artisan db:seed --class=DemoDataSeeder             # demo traffic, local only
+```
+
 Add the scheduler to cron once, if it is not already there:
 
 ```cron
@@ -175,7 +189,7 @@ Adding a site or a courier target is a row in the admin, never a code change.
 ```bash
 php artisan webhooks:retry            # manual sweep (also runs every minute)
 php artisan webhooks:prune            # trim the log (also runs daily at 03:10)
-php artisan test --compact            # 64 tests
+php artisan test --compact            # 98 tests
 vendor/bin/pint                       # code style
 ```
 

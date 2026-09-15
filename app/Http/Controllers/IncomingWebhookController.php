@@ -80,6 +80,9 @@ final class IncomingWebhookController extends Controller
     }
 
     /**
+     * Couriers send JSON, but a form-encoded body is accepted too, and is read
+     * from the raw content when the framework did not parse it.
+     *
      * @return array<array-key, mixed>
      */
     private function payload(Request $request): array
@@ -90,7 +93,15 @@ final class IncomingWebhookController extends Controller
             return $decoded;
         }
 
-        return $request->all();
+        $parameters = $request->all();
+
+        if ($parameters !== []) {
+            return $parameters;
+        }
+
+        parse_str($request->getContent(), $parsed);
+
+        return $parsed;
     }
 
     /**
