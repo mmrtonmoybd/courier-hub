@@ -301,3 +301,50 @@ it('acknowledges the courier even when the tenant rejects the forward', function
         ->and($delivery->last_error)->toBe('HTTP 500')
         ->and($delivery->next_attempt_at)->not->toBeNull();
 });
+
+it('keeps only the database with the strongest evidence when several recognise the order', function (): void {
+    fakeTenant('shop_owner', [[
+        'invoice_no' => 'INV-DUP2',
+        'tracking_id' => 'PX-555',
+        'customer_phone' => '01711112222',
+    ]]);
+    fakeTenant('shop_sibling', [['invoice_no' => 'INV-DUP2']]);
+
+    WebhookTransfer::factory()->courier(Courier::Pathao)->database('shop_owner')->create([
+        'target_url' => 'https://shop-owner.test',
+    ]);
+    WebhookTransfer::factory()->courier(Courier::Pathao)->database('shop_sibling')->create([
+        'target_url' => 'https://shop-sibling.test',
+    ]);
+
+    $this->postJson('/api/webhooks/pathao', [
+        'merchant_order_id' => 'INV-DUP2',
+        'consignment_id' => 'PX-555',
+    ])->assertStatus(202);
+
+    expect(WebhookDelivery::query()->sole()->database_name)->toBe('shop_owner');
+
+    Http::assertSent(fn (Request $request): bool => $request->url() === 'https://shop-owner.test/api/webhooks/pathao');
+    Http::assertNotSent(fn (Request $request): bool => $request->url() === 'https://shop-sibling.test/api/webhooks/pathao');
+});
+
+it('drops a database that only shares the customer phone number', function (): void {
+    fakeTenant('shop_real', [['invoice_no' => 'INV-6006', 'customer_phone' => '01822223333']]);
+    fakeTenant('shop_samephone', [['invoice_no' => 'INV-OTHER', 'customer_phone' => '01822223333']]);
+
+    WebhookTransfer::factory()->courier(Courier::Pathao)->database('shop_real')->create([
+        'target_url' => 'https://shop-real.test',
+    ]);
+    WebhookTransfer::factory()->courier(Courier::Pathao)->database('shop_samephone')->create([
+        'target_url' => 'https://shop-samephone.test',
+    ]);
+
+    $this->postJson('/api/webhooks/pathao', [
+        'merchant_order_id' => 'INV-6006',
+        'recipient_phone' => '01822223333',
+    ])->assertStatus(202);
+
+    expect(WebhookDelivery::query()->sole()->database_name)->toBe('shop_real');
+
+    Http::assertNotSent(fn (Request $request): bool => $request->url() === 'https://shop-samephone.test/api/webhooks/pathao');
+});

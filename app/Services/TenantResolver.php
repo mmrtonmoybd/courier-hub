@@ -22,6 +22,18 @@ use Throwable;
  */
 final class TenantResolver
 {
+    /**
+     * How much each matched key says about ownership. A courier-assigned
+     * tracking id outranks any number the merchant chose themselves.
+     */
+    private const STRENGTH_TRACKING = 4;
+
+    private const STRENGTH_INVOICE = 2;
+
+    private const STRENGTH_PHONE = 1;
+
+    private const STRENGTH_NAME = 1;
+
     public function __construct(
         private readonly TenantConnectionManager $connections,
         private readonly TenantRouteCache $routeCache,
@@ -44,15 +56,17 @@ final class TenantResolver
             }
         }
 
-        $matches = [];
+        $candidates = [];
 
         foreach ($this->mappedDatabases($courier) as $database) {
-            $matchedBy = $this->matchIn($database, $identity);
+            $candidate = $this->matchIn($database, $identity);
 
-            if ($matchedBy instanceof MatchKey) {
-                $matches[] = new TenantMatch($database, $matchedBy);
+            if ($candidate !== null) {
+                $candidates[] = $candidate + ['database' => $database];
             }
         }
+
+        $matches = $this->strongestOnly($candidates);
 
         if ($matches !== []) {
             $this->routeCache->put($courier, $identity, $matches);
@@ -78,31 +92,76 @@ final class TenantResolver
     }
 
     /**
+     * Sibling storefronts of one merchant reuse invoice numbers, and one
+     * customer shops on several of them, so more than one database can
+     * recognise the same parcel. Only the databases holding the strongest
+     * evidence survive; everything weaker is a namesake, not an owner.
+     *
+     * @param  array<int, array{database: string, key: MatchKey, strength: int}>  $candidates
+     * @return array<int, TenantMatch>
+     */
+    private function strongestOnly(array $candidates): array
+    {
+        if ($candidates === []) {
+            return [];
+        }
+
+        $strongest = max(array_column($candidates, 'strength'));
+
+        $matches = [];
+
+        foreach ($candidates as $candidate) {
+            if ($candidate['strength'] === $strongest) {
+                $matches[] = new TenantMatch($candidate['database'], $candidate['key']);
+            }
+        }
+
+        return $matches;
+    }
+
+    /**
      * One statement per tenant tests every key at once; priority between the
      * keys is then applied in PHP (invoice, tracking, phone, and name only when
      * the payload carried none of the other three).
+     *
+     * The reported key keeps that order, but the strength score does not: a
+     * tracking id is assigned by the courier itself and is unique across every
+     * site, an invoice number is only unique within one site, and a phone
+     * number is unique to nobody.
+     *
+     * @return array{key: MatchKey, strength: int}|null
      */
-    private function matchIn(string $database, WebhookIdentity $identity): ?MatchKey
+    private function matchIn(string $database, WebhookIdentity $identity): ?array
     {
         try {
             $row = $this->probeOrders($database, $identity);
 
             if ($row !== null) {
+                $key = null;
+                $strength = 0;
+
                 if (filled($identity->invoiceNo) && (int) ($row['by_invoice'] ?? 0) === 1) {
-                    return MatchKey::Invoice;
+                    $key = MatchKey::Invoice;
+                    $strength += self::STRENGTH_INVOICE;
                 }
 
                 if (filled($identity->trackingId) && (int) ($row['by_tracking'] ?? 0) === 1) {
-                    return MatchKey::Tracking;
+                    $key ??= MatchKey::Tracking;
+                    $strength += self::STRENGTH_TRACKING;
                 }
 
                 if (filled($identity->phone) && (int) ($row['by_phone'] ?? 0) === 1) {
-                    return MatchKey::Phone;
+                    $key ??= MatchKey::Phone;
+                    $strength += self::STRENGTH_PHONE;
+                }
+
+                if ($key instanceof MatchKey) {
+                    return ['key' => $key, 'strength' => $strength];
                 }
             }
 
             if (! $identity->hasStrongKey() && filled($identity->name) && $this->matchesName($database, $identity->name)) {
-                return MatchKey::Name;
+                return ['key' => MatchKey::Name, 'strength' => self::STRENGTH_NAME];
             }
         } catch (Throwable $exception) {
             Log::warning('Tenant lookup failed', [
